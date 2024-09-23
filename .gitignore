@@ -1,0 +1,16 @@
+hazelcast-4.2.2/
+*.pcap
+venv/
+__pycache__
+.idea/
+*.pyc
+.Trashes
+results/
+.env~
+fn_test.sh
+todos.txt
+experiment_ideas.txt
+experiment_notes.txt
+.vscode
+.env
+src/txts_unit/time_output.txt

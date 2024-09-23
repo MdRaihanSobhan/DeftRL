@@ -1,0 +1,4 @@
+Latency(ms), Throughput(byte/s), Throughput(pps), Packets Processed, Packets Dropped, Input Buffer Max Length, Output Buffer Max Length, Time in Input Buffer(ms), Time in Output Buffer(ms), Time in pkt processing(ms), Path Latency(ms)
+196.38704,199233.1573218571, 1399.0249570442475,                 50000, 110406, 200,                 20, 130.6371,                 12.20502, 0.00364, 53.541280000000015
+221.86858,180238.41280434545, 1266.4486396976592,                 50000, 101265, 200,                 20, 144.99528,                 13.34234, 0.00504, 63.52592
+201.73472,196190.53716950398, 1377.2898878218257,                 50000, 110507, 200,                 20, 133.91462,                 12.40616, 0.00282, 55.41112
