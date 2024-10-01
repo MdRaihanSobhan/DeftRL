@@ -21,7 +21,7 @@
 
 9. install ifconfig and ping: 
     - apt update
-    - apt install -y iputils-ping net-tools
+    - apt  install-y iputils-ping net-tools
 
 10. ping cont2 from cont1
     - ping 173.16.1.3
