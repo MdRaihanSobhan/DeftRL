@@ -5,6 +5,7 @@ from dataclasses import dataclass
 import os
 from dotenv import load_dotenv
 import redis
+import time
 
 load_dotenv()
 
@@ -69,7 +70,36 @@ class Stamper(DatagramProtocol):
         self.flow_pkt_cnt[flow] += 1
 
     
+    # def datagramReceived(self, data, src_addr):
+    #     src_ip, src_port = src_addr
+
+    #     dst_hz_client = self.select_hz_client(src_addr)
+
+    #     self.pkt_cnt += 1
+    #     self.pkt_cnt_since_last_reading += 1
+    #     if self.pkt_cnt_since_last_reading == 1000:
+    #         print("Packets processed: ", self.pkt_cnt)
+    #         self.pkt_cnt_since_last_reading = 0
+
+    #     data = self.stamp_packet(data, src_addr)
+    #     self.incr_pkt_cnt(src_addr)
+
+    #     self.transport.write(data, (dst_hz_client, HZ_CLIENT_LISTEN_PORT))
+
+    MAX_RETRIES = 5
+
+    def send_packet(self, data, dst_hz_client, retries=0):
+        try:
+            self.transport.write(data, (dst_hz_client, HZ_CLIENT_LISTEN_PORT))
+        except Exception as e:
+            if retries < self.MAX_RETRIES:
+                time.sleep(0.1 * (2 ** retries))  # Exponential backoff
+                self.send_packet(data, dst_hz_client, retries + 1)
+            else:
+                print(f"Failed to send packet after {self.MAX_RETRIES} retries: {e}")
+
     def datagramReceived(self, data, src_addr):
+        # ... (existing code)
         src_ip, src_port = src_addr
 
         dst_hz_client = self.select_hz_client(src_addr)
@@ -84,6 +114,10 @@ class Stamper(DatagramProtocol):
         self.incr_pkt_cnt(src_addr)
 
         self.transport.write(data, (dst_hz_client, HZ_CLIENT_LISTEN_PORT))
+
+        dst_hz_client = self.select_hz_client(src_addr)
+        data = self.stamp_packet(data, src_addr)
+        self.send_packet(data, dst_hz_client)  # Use the new method
 
 reactor.listenUDP(STAMPER_LISTEN_PORT, Stamper())
 print(f'Listening on port {STAMPER_LISTEN_PORT}...')

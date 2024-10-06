@@ -35,16 +35,17 @@ class DEFTEnvironment(gym.Env):
         return next_state, reward, done, {}
 
     def _apply_action(self, action):
+        scale_factor = 0.1  # 10% change
         if action == 0:
-            Limit.BATCH_SIZE = max(10, Limit.BATCH_SIZE - 10)
+            Limit.BATCH_SIZE = max(10, int(Limit.BATCH_SIZE * (1 - scale_factor)))
         elif action == 1:
-            Limit.BATCH_SIZE = min(200, Limit.BATCH_SIZE + 10)
+            Limit.BATCH_SIZE = min(200, int(Limit.BATCH_SIZE * (1 + scale_factor)))
         elif action == 2:
-            Limit.BUFFER_LIMIT = max(Limit.BATCH_SIZE, Limit.BUFFER_LIMIT - Limit.BATCH_SIZE)
+            Limit.BUFFER_LIMIT = max(Limit.BATCH_SIZE, min(5 * Limit.BATCH_SIZE, Limit.BUFFER_LIMIT - Limit.BATCH_SIZE))
         elif action == 3:
-            Limit.BUFFER_LIMIT = min(10 * Limit.BATCH_SIZE, Limit.BUFFER_LIMIT + Limit.BATCH_SIZE)
+            Limit.BUFFER_LIMIT = max(Limit.BATCH_SIZE, min(5 * Limit.BATCH_SIZE, Limit.BUFFER_LIMIT + Limit.BATCH_SIZE))
         elif action == 4:
-            Limit.GLOBAL_UPDATE_FREQUENCY = max(1, Limit.GLOBAL_UPDATE_FREQUENCY - 1)
+            Limit.GLOBAL_UPDATE_FREQUENCY = max(1, min(10, Limit.GLOBAL_UPDATE_FREQUENCY - 1))
 
     def _get_next_state(self):
         return np.array([
@@ -59,8 +60,16 @@ class DEFTEnvironment(gym.Env):
             Statistics.calculate_path_latency()
         ], dtype=np.float32)
 
+    # def _calculate_reward(self, state):
+    #     return calculate_reward(*state, previous_state=self.previous_state)
     def _calculate_reward(self, state):
-        return calculate_reward(*state, previous_state=self.previous_state)
+        base_reward = calculate_reward(*state, previous_state=self.previous_state)
+        ack_failure_penalty = -10 if self._check_ack_failure() else 0
+        return base_reward + ack_failure_penalty
+    
+    def _check_ack_failure(self):
+        # Implement logic to check for acknowledgment failures
+        pass
 
 def calculate_reward(
     latency,

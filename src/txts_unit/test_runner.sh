@@ -14,7 +14,9 @@ run_test() {
         docker exec -d "$id" python -u secondary_test.py
     done;
 
-    iperf -c 127.0.0.1 -p 8080 -u -b "$1"pps -l 100 -t 1200 -x CDMSV -P "$2" &
+
+
+    iperf -c 127.0.0.1 -p 5001 -u -b 10pps -l 100 -t 60 -x CDMSV -P 10 -i 1
 
     python kill_iperf.py
     
